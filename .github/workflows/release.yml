@@ -38,8 +38,8 @@ jobs:
           directory: ${{ runner.temp }}/llvm
       - name: Windows env
         if: runner.os == 'Windows'
-        env:
-          RUSTFLAGS: '-Ctarget-feature=+crt-static'
+        run: |
+          echo "RUSTFLAGS='-Ctarget-feature=+crt-static'" >> $GITHUB_ENV
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           # (required)
