@@ -36,6 +36,10 @@ jobs:
         with:
           version: "11.0.0"
           directory: ${{ runner.temp }}/llvm
+      - name: Windows env
+        if: runner.os == 'Windows'
+        env:
+          RUSTFLAGS: '-Ctarget-feature=+crt-static'
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           # (required)
