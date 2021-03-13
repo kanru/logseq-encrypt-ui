@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.1.6 - 2021-03-13
+
+
+### Continuous Integration
+
+165817 - static link on windows - Kan-Ru Chen
+
+
+- - -
 ## 0.1.5 - 2021-03-13
 
 
