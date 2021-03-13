@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.1.1 - 2021-03-13
+
+
+### Continuous Integration
+
+bc4ec4 - release tags does not have v-prefix - Kan-Ru Chen
+
+
+- - -
 ## 0.1.0 - 2021-03-13
 
 
