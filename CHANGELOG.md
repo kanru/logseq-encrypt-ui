@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.1.3 - 2021-03-13
+
+
+### Continuous Integration
+
+5b5c0d - install llvm on all platforms - Kan-Ru Chen
+
+
+- - -
 ## 0.1.2 - 2021-03-13
 
 
