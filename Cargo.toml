@@ -1,0 +1,20 @@
+[package]
+name = "logseq-encrypt-ui"
+description = "Utility to encrypt/decrypt Logseq graphs"
+license = "MIT OR Apache-2.0"
+version = "0.1.0"
+authors = ["Kan-Ru Chen <kanru@kanru.info>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+iui = { git = "https://github.com/rust-native-ui/libui-rs.git", branch = "trunk" }
+edn-rs = "0.16.12"
+age = { version = "0.5.1", features = ["armor"] }
+secrecy = "0.7.0"
+walkdir = "2"
+bastion = "0.4"
+anyhow = "1"
+tracing-subscriber = "0.2.17"
+tracing = "0.1.25"
