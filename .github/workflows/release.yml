@@ -34,7 +34,7 @@ jobs:
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v1.1.1
         with:
-          version: "11.0.1"
+          version: "11.0.0"
           directory: ${{ runner.temp }}/llvm
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
@@ -53,3 +53,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # (optional)
           CARGO_PROFILE_RELEASE_LTO: true
+          LLVM_CONFIG_PATH: ${{ runner.temp }}/llvm/bin/llvm-config
+          LIBCLANG_PATH: ${{ runner.temp }}/llvm/lib
+          LIBCLANG_STATIC_PATH: ${{ runner.temp }}/llvm/lib
+          CLANG_PATH: ${{ runner.temp }}/llvm/bin/clang
