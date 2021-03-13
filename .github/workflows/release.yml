@@ -39,7 +39,7 @@ jobs:
       - name: Windows env
         if: runner.os == 'Windows'
         run: |
-          echo "RUSTFLAGS='-Ctarget-feature=+crt-static'" >> $GITHUB_ENV
+          echo "RUSTFLAGS=-Ctarget-feature=+crt-static" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           # (required)
