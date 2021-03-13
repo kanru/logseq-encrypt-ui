@@ -28,9 +28,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - name: Install dependencies
+      - name: Install gtk3
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev clang
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: "11.0.1"
+          directory: ${{ runner.temp }}/llvm
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           # (required)
