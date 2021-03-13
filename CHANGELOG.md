@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.1.2 - 2021-03-13
+
+
+### Continuous Integration
+
+e1234d - quote tags regex - Kan-Ru Chen
+
+
+- - -
 ## 0.1.1 - 2021-03-13
 
 
