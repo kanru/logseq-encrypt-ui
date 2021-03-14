@@ -2,6 +2,26 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.3.0 - 2021-03-14
+
+
+### Bug Fixes
+
+d6d9d4 - do not try to decrypt backup files - [kanru](https://github.com/kanru)
+
+
+### Features
+
+91c68e - report errors to ui - [kanru](https://github.com/kanru)
+
+e89783 - debounce log update - [kanru](https://github.com/kanru)
+
+0b2efa - re-enable ui after finish processing - [kanru](https://github.com/kanru)
+
+7d7bab - implement encryption support - [kanru](https://github.com/kanru)
+
+
+- - -
 ## 0.2.0 - 2021-03-14
 
 
