@@ -2,6 +2,22 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.2.0 - 2021-03-14
+
+
+### Miscellaneous Chores
+
+a4a50c - add github metadata - [kanru](https://github.com/kanru)
+
+
+### Features
+
+37c350 - updated information text - [kanru](https://github.com/kanru)
+
+616abf - disable console on windows - [kanru](https://github.com/kanru)
+
+
+- - -
 ## 0.1.8 - 2021-03-13
 
 
