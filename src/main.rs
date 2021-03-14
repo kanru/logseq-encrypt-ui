@@ -28,7 +28,7 @@ fn main() {
 
     let (input_vbox, mut open_file_button, mut encrypt_file_button, mut decrypt_file_button) = {
         let mut input_vbox = VerticalBox::new(&ui);
-        let label = Label::new(&ui, "Information");
+        let label = Label::new(&ui, "Information\n\nPlease unlink your graph first\nthen open the logseq/metadata.edn file\nto start.");
         let open_file_button = Button::new(&ui, "Open metadata.edn");
         let mut encrypt_file_button = Button::new(&ui, "Encrypt Graph");
         let mut decrypt_file_button = Button::new(&ui, "Decrypt Graph");
