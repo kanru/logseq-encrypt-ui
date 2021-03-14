@@ -2,6 +2,20 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.3.2 - 2021-03-14
+
+
+### Bug Fixes
+
+6ef1dd - deserialize secrets correctly on all platform - [kanru](https://github.com/kanru)
+
+
+### Miscellaneous Chores
+
+b4023e - add cog pre_bump_hooks - [kanru](https://github.com/kanru)
+
+
+- - -
 ## 0.3.1 - 2021-03-14
 
 
