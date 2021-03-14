@@ -2,6 +2,22 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.3.1 - 2021-03-14
+
+
+### Documentation
+
+dc46ee - add windows screenshot - [kanru](https://github.com/kanru)
+
+9184f2 - create README.md - [kanru](https://github.com/kanru)
+
+
+### Bug Fixes
+
+f5c734 - serialize secrets correctly on all platform - [kanru](https://github.com/kanru)
+
+
+- - -
 ## 0.3.0 - 2021-03-14
 
 
