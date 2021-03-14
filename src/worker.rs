@@ -42,18 +42,30 @@ pub(crate) async fn worker(ctx: BastionContext, logger: ChildrenRef) -> Result<(
     loop {
         msg! { ctx.recv().await?,
             msg: Encrypt => {
-                let logger = logger.clone();
+                let logger_ref = logger.clone();
+                logger.broadcast(logger::UiToggle::Disable)
+                    .expect("unable to send message to worker");
+
                 let task = blocking! {
-                    encrypt(msg, &logger).expect("encryption failed");
+                    encrypt(msg, &logger_ref).expect("encryption failed");
                 };
                 task.await;
+
+                logger.broadcast(logger::UiToggle::Enable)
+                    .expect("unable to send message to worker");
             };
             msg: Decrypt => {
-                let logger = logger.clone();
+                let logger_ref = logger.clone();
+                logger.broadcast(logger::UiToggle::Disable)
+                    .expect("unable to send message to worker");
+
                 let task = blocking! {
-                    decrypt(msg, &logger).expect("decryption failed");
+                    decrypt(msg, &logger_ref).expect("decryption failed");
                 };
                 task.await;
+
+                logger.broadcast(logger::UiToggle::Enable)
+                    .expect("unable to send message to worker");
             };
             _: _ => ();
         }

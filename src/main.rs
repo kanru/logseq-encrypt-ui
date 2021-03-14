@@ -285,6 +285,23 @@ fn main() {
                 };
                 _: _ => ();
             }
+
+            let answer = logger.elems()[0]
+                .ask_anonymously(logger::GetUiStateRequest)
+                .expect("unable to send message to worker");
+            let answer = bastion::run!(answer).expect("failed to get ui state");
+            msg! { answer,
+                msg: logger::GetUiStateResponse => {
+                    if msg.0 {
+                        open_file_button.disable(&ui);
+                        encrypt_file_button.disable(&ui);
+                        decrypt_file_button.disable(&ui);
+                    } else {
+                        open_file_button.enable(&ui);
+                    }
+                };
+                _: _ => ();
+            }
         }
     });
 
