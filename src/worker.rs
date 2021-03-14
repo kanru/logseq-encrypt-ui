@@ -132,8 +132,8 @@ fn encrypt(msg: Encrypt, logger: &ChildrenRef) -> Result<()> {
     writer.finish().and_then(|armor| armor.finish())?;
 
     let metadata_content = format!(
-        "{{:db/encrypted? true :db/encrypted-secret {:?}}}",
-        std::str::from_utf8(&encrypted_secret)?
+        "{{:db/encrypted? true :db/encrypted-secret \"{}\"}}",
+        std::str::from_utf8(&encrypted_secret)?.replace("\n", "\\n")
     );
     let mut writer = fs::File::create(&metadata_path)?;
     writer.write_all(metadata_content.as_bytes())?;
