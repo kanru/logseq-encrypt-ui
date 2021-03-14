@@ -120,7 +120,9 @@ fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
     let mut files = HashSet::new();
     for entry in walkdir::WalkDir::new(graph_dir) {
         let entry = entry?;
-        if entry.file_type().is_file() && !entry.path().ends_with(".bak") {
+        if entry.file_type().is_file()
+            && !entry.path().extension().map_or(false, |ext| ext.eq("bak"))
+        {
             tracing::info!("Examining file {}", entry.path().display());
             let mut file = fs::File::open(entry.path())?;
             let mut buf = [0u8; 256];
