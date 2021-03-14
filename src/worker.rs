@@ -47,9 +47,14 @@ pub(crate) async fn worker(ctx: BastionContext, logger: ChildrenRef) -> Result<(
                     .expect("unable to send message to worker");
 
                 let task = blocking! {
-                    encrypt(msg, &logger_ref).expect("encryption failed");
+                    encrypt(msg, &logger_ref)
                 };
-                task.await;
+                match task.await.transpose() {
+                    Ok(_) => (),
+                    Err(e) => {
+                        ui_info(&logger, format!("Encryption failed: {}", e.to_string()));
+                    }
+                }
 
                 logger.broadcast(logger::UiToggle::Enable)
                     .expect("unable to send message to worker");
@@ -60,9 +65,14 @@ pub(crate) async fn worker(ctx: BastionContext, logger: ChildrenRef) -> Result<(
                     .expect("unable to send message to worker");
 
                 let task = blocking! {
-                    decrypt(msg, &logger_ref).expect("decryption failed");
+                    decrypt(msg, &logger_ref)
                 };
-                task.await;
+                match task.await.transpose() {
+                    Ok(_) => (),
+                    Err(e) => {
+                        ui_info(&logger, format!("Decryption failed: {}", e.to_string()));
+                    }
+                }
 
                 logger.broadcast(logger::UiToggle::Enable)
                     .expect("unable to send message to worker");
