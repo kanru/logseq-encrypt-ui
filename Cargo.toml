@@ -2,7 +2,7 @@
 name = "logseq-encrypt-ui"
 description = "Utility to encrypt/decrypt Logseq graphs"
 license = "MIT OR Apache-2.0"
-version = "0.1.0"
+version = "0.3.1"
 authors = ["Kan-Ru Chen <kanru@kanru.info>"]
 edition = "2018"
 repository = "https://github.com/kanru/logseq-encrypt-ui"

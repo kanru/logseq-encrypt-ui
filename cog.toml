@@ -1,5 +1,10 @@
 changelog_path = "CHANGELOG.md"
-pre_bump_hooks = []
+pre_bump_hooks = [
+    "cargo clippy",
+    "cargo build --release",
+    "cargo fmt --all",
+    "cargo bump %version",
+]
 post_bump_hooks = []
 authors = [{ signature = "Kan-Ru Chen", username = "kanru" }]
 
