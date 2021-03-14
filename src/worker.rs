@@ -94,13 +94,10 @@ fn encrypt(msg: Encrypt, logger: &ChildrenRef) -> Result<()> {
     let metadata_edn = Edn::from_str(&content).unwrap();
     let metadata = LogseqMetadata {
         db_encrypted: metadata_edn[":db/encrypted?"].to_bool().unwrap_or(false),
-        db_encrypted_secret: metadata_edn[":db/encrypted-secret"]
-            .to_string()
-            .strip_prefix("\"")
-            .unwrap_or("")
-            .strip_suffix("\"")
-            .unwrap_or("")
-            .replace("\\n", "\n"),
+        db_encrypted_secret: match &metadata_edn[":db/encrypted-secret"] {
+            Edn::Str(secret) => secret.clone(),
+            _ => "".to_string(),
+        },
     };
     if metadata.db_encrypted {
         ui_info(
@@ -191,13 +188,10 @@ fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
     let metadata_edn = Edn::from_str(&content).unwrap();
     let metadata = LogseqMetadata {
         db_encrypted: metadata_edn[":db/encrypted?"].to_bool().unwrap_or(false),
-        db_encrypted_secret: metadata_edn[":db/encrypted-secret"]
-            .to_string()
-            .strip_prefix("\"")
-            .unwrap_or("")
-            .strip_suffix("\"")
-            .unwrap_or("")
-            .replace("\\n", "\n"),
+        db_encrypted_secret: match &metadata_edn[":db/encrypted-secret"] {
+            Edn::Str(secret) => secret.clone(),
+            _ => "".to_string(),
+        },
     };
     if !metadata.db_encrypted {
         ui_info(logger, "Graph is not encrypted".to_string());
