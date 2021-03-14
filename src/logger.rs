@@ -8,6 +8,8 @@ pub(crate) struct GetLogRequest;
 #[derive(Debug)]
 pub(crate) struct GetLogResponse(pub(crate) String);
 #[derive(Debug)]
+pub(crate) struct NotModified;
+#[derive(Debug)]
 pub(crate) enum UiToggle {
     Enable,
     Disable,
@@ -19,6 +21,7 @@ pub(crate) struct GetUiStateResponse(pub(crate) bool);
 
 pub(crate) async fn logger(ctx: BastionContext) -> Result<(), ()> {
     let mut buf = String::new();
+    let mut new_logs = false;
     let mut main_ui_disabled = false;
     loop {
         msg! { ctx.recv().await?,
@@ -26,10 +29,16 @@ pub(crate) async fn logger(ctx: BastionContext) -> Result<(), ()> {
                 tracing::info!("{}", put_log.0);
                 buf.push_str(&put_log.0);
                 buf.push('\n');
+                new_logs = true;
             };
             get_log: GetLogRequest =!> {
                 tracing::debug!("Received get log request");
-                answer!(ctx, GetLogResponse(buf.clone())).expect("unable to send message");
+                if new_logs {
+                    answer!(ctx, GetLogResponse(buf.clone())).expect("unable to send message");
+                    new_logs = false;
+                } else {
+                    answer!(ctx, NotModified).expect("unable to send message");
+                }
             };
             ref msg: UiToggle => {
                 match msg {
