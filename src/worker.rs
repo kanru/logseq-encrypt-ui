@@ -1,17 +1,16 @@
 use crate::logger;
 use age::{
-    armor::{ArmoredReader, ArmoredWriter},
-    x25519, Decryptor, Identity,
+    armor::{ArmoredReader, ArmoredWriter, Format},
+    x25519, Decryptor, Encryptor, Identity, Recipient,
 };
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Error, Result};
 use bastion::prelude::*;
 use edn_rs::Edn;
-use secrecy::Secret;
+use secrecy::{ExposeSecret, Secret};
 use std::{
     collections::HashSet,
     fs,
     io::{copy, Read, Write},
-    iter,
     str::FromStr,
 };
 
@@ -42,8 +41,12 @@ pub(crate) async fn worker(ctx: BastionContext, logger: ChildrenRef) -> Result<(
 
     loop {
         msg! { ctx.recv().await?,
-            encrypt: Encrypt => {
-                ui_info(&logger, "Not implemented yet".to_string());
+            msg: Encrypt => {
+                let logger = logger.clone();
+                let task = blocking! {
+                    encrypt(msg, &logger).expect("encryption failed");
+                };
+                task.await;
             };
             msg: Decrypt => {
                 let logger = logger.clone();
@@ -61,6 +64,103 @@ fn ui_info(logger: &ChildrenRef, log: String) {
     logger
         .broadcast(logger::PutLogRequest(log))
         .expect("unable to send message to worker");
+}
+
+fn encrypt(msg: Encrypt, logger: &ChildrenRef) -> Result<()> {
+    let metadata_path = msg.path;
+    let content = fs::read_to_string(&metadata_path).unwrap();
+    let metadata_edn = Edn::from_str(&content).unwrap();
+    let metadata = LogseqMetadata {
+        db_encrypted: metadata_edn[":db/encrypted?"].to_bool().unwrap_or(false),
+        db_encrypted_secret: metadata_edn[":db/encrypted-secret"]
+            .to_string()
+            .strip_prefix("\"")
+            .unwrap_or("")
+            .strip_suffix("\"")
+            .unwrap_or("")
+            .replace("\\n", "\n"),
+    };
+    if metadata.db_encrypted {
+        ui_info(
+            logger,
+            "Graph is already encrypted, please decrypt it first".to_string(),
+        );
+        return Ok(());
+    }
+
+    ui_info(
+        logger,
+        "Update metadata.edn to enable encryption...".to_string(),
+    );
+    let secret = x25519::Identity::generate();
+    let public = secret.to_public();
+    let secret_pair = format!(
+        "(\"{}\" \"{}\")",
+        secret.to_string().expose_secret(),
+        public.to_string()
+    );
+    let mut encrypted_secret = Vec::new();
+    let encryptor = Encryptor::with_user_passphrase(Secret::new(msg.password));
+    let armor = ArmoredWriter::wrap_output(&mut encrypted_secret, Format::AsciiArmor)?;
+    let mut writer = encryptor
+        .wrap_output(armor)
+        .map_err(Error::msg)
+        .context("failed to create encryptor")?;
+    writer.write_all(secret_pair.as_bytes())?;
+    writer.finish().and_then(|armor| armor.finish())?;
+
+    let metadata_content = format!(
+        "{{:db/encrypted? true :db/encrypted-secret {:?}}}",
+        std::str::from_utf8(&encrypted_secret)?
+    );
+    let mut writer = fs::File::create(&metadata_path)?;
+    writer.write_all(metadata_content.as_bytes())?;
+    writer.flush()?;
+
+    let graph_dir = metadata_path.parent().unwrap().parent().unwrap();
+
+    ui_info(
+        logger,
+        format!(
+            "Searching items in graph directory: {}",
+            graph_dir.to_string_lossy()
+        ),
+    );
+
+    let mut files = HashSet::new();
+    for entry in walkdir::WalkDir::new(graph_dir) {
+        let entry = entry?;
+        if entry.file_type().is_file()
+            && (entry.path().extension().map_or(false, |ext| ext.eq("md"))
+                || entry.path().extension().map_or(false, |ext| ext.eq("org")))
+        {
+            tracing::info!("Found file {}", entry.path().display());
+            files.insert(entry.path().to_owned());
+        }
+    }
+    ui_info(logger, format!("Found {} files to process", files.len()));
+
+    for item in files.iter() {
+        let bak = item.with_file_name(format!("{}.bak", item.to_string_lossy()));
+        ui_info(
+            logger,
+            format!("Backing up file to {}", bak.to_string_lossy()),
+        );
+        fs::rename(item, &bak)?;
+
+        ui_info(logger, format!("Encrypting {}", item.to_string_lossy()));
+        let mut output = fs::File::create(&item)?;
+        let armor = ArmoredWriter::wrap_output(&mut output, Format::AsciiArmor)?;
+        let recipients = vec![Box::new(public.clone()) as Box<dyn Recipient>];
+        let encryptor = Encryptor::with_recipients(recipients);
+        let mut writer = encryptor.wrap_output(armor).map_err(Error::msg)?;
+        let mut reader = fs::File::open(&bak)?;
+        copy(&mut reader, &mut writer)?;
+        writer.finish().and_then(|armor| armor.finish())?;
+    }
+
+    ui_info(logger, "Done!".to_string());
+    Ok(())
 }
 
 fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
