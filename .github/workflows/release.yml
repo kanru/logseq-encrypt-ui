@@ -44,6 +44,8 @@ jobs:
         with:
           # (required)
           bin: logseq-encrypt-ui
+          # (optional) Archive name (non-extension portion of filename) to be uploaded.
+          archive: $bin-$tag-$target
           # (optional) On which platform to distribute the `.tar.gz` file.
           # [default value: unix]
           # [possible values: all, unix, windows, none]
