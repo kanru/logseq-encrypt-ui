@@ -2,6 +2,27 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.3.3 - 2021-03-21
+
+
+### Refactoring
+
+5d4c0c - fix clippy warnings - [kanru](https://github.com/kanru)
+
+
+### Bug Fixes
+
+bc2973 - handle read_amount returned by Read::read - [kanru](https://github.com/kanru)
+
+
+### Miscellaneous Chores
+
+de6efb - add version info to released files - [kanru](https://github.com/kanru)
+
+a7dac0 - 0.3.2 - [kanru](https://github.com/kanru)
+
+
+- - -
 ## 0.3.2 - 2021-03-14
 
 
