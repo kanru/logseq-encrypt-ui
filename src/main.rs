@@ -149,7 +149,6 @@ fn main() {
             });
             ok_button.on_clicked(&ui, {
                 let ui = ui.clone();
-                let mut dialog = dialog.clone();
                 let mut window = window.clone();
                 let mut open_file_button = open_file_button.clone();
                 let mut encrypt_file_button = encrypt_file_button.clone();
@@ -159,7 +158,7 @@ fn main() {
                 move |_| {
                     let password = password_entry.value(&ui);
                     let confirm = confirm_entry.value(&ui);
-                    if password == "" {
+                    if password.is_empty() {
                         message_box.set_text(&ui, "Password should not be blank");
                         return;
                     }
@@ -194,8 +193,6 @@ fn main() {
         let open_file_button = open_file_button.clone();
         let encrypt_file_button = encrypt_file_button.clone();
         let decrypt_file_button = decrypt_file_button.clone();
-        let state = state.clone();
-        let worker = worker.clone();
         let mut window = window.clone();
 
         move |_| {
@@ -231,7 +228,6 @@ fn main() {
             });
             ok_button.on_clicked(&ui, {
                 let ui = ui.clone();
-                let mut dialog = dialog.clone();
                 let mut window = window.clone();
                 let mut open_file_button = open_file_button.clone();
                 let mut encrypt_file_button = encrypt_file_button.clone();
@@ -240,7 +236,7 @@ fn main() {
                 let state = state.clone();
                 move |_| {
                     let password = password_entry.value(&ui);
-                    if password == "" {
+                    if password.is_empty() {
                         message_box.set_text(&ui, "Password should not be blank");
                         return;
                     }

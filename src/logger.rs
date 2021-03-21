@@ -1,5 +1,4 @@
 use bastion::prelude::*;
-use tracing;
 
 #[derive(Debug)]
 pub(crate) struct PutLogRequest(pub(crate) String);
@@ -31,7 +30,7 @@ pub(crate) async fn logger(ctx: BastionContext) -> Result<(), ()> {
                 buf.push('\n');
                 new_logs = true;
             };
-            get_log: GetLogRequest =!> {
+            _msg: GetLogRequest =!> {
                 tracing::debug!("Received get log request");
                 if new_logs {
                     answer!(ctx, GetLogResponse(buf.clone())).expect("unable to send message");
@@ -46,7 +45,7 @@ pub(crate) async fn logger(ctx: BastionContext) -> Result<(), ()> {
                     UiToggle::Disable => main_ui_disabled = true,
                 }
             };
-            msg: GetUiStateRequest =!> {
+            _msg: GetUiStateRequest =!> {
                 tracing::debug!("Received get ui state request");
                 answer!(ctx, GetUiStateResponse(main_ui_disabled)).expect("unable to send message");
             };
