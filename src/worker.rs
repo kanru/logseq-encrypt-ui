@@ -242,9 +242,10 @@ fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
             tracing::info!("Examining file {}", entry.path().display());
             let mut file = fs::File::open(entry.path())?;
             let mut buf = [0u8; 256];
-            file.read(&mut buf)?;
-            if buf.starts_with(b"-----BEGIN AGE ENCRYPTED FILE-----")
-                || buf.starts_with(b"age-encryption.org/v1")
+            let read_amount = file.read(&mut buf)?;
+            if read_amount > 0
+                && (buf.starts_with(b"-----BEGIN AGE ENCRYPTED FILE-----")
+                    || buf.starts_with(b"age-encryption.org/v1"))
             {
                 files.insert(entry.path().to_owned());
             }
