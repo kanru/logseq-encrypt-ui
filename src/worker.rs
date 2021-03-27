@@ -3,14 +3,15 @@ use age::{
     armor::{ArmoredReader, ArmoredWriter, Format},
     x25519, Decryptor, Encryptor, Identity, Recipient,
 };
-use anyhow::{anyhow, Context, Error, Result};
+use anyhow::{anyhow, bail, Context, Error, Result};
 use bastion::prelude::*;
 use edn_rs::Edn;
 use secrecy::{ExposeSecret, Secret};
 use std::{
     collections::HashSet,
     fs,
-    io::{copy, Read, Write},
+    io::{copy, BufRead, BufReader, Read, Write},
+    path::Path,
     str::FromStr,
 };
 
@@ -240,12 +241,12 @@ fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
             && !entry.path().extension().map_or(false, |ext| ext.eq("bak"))
         {
             tracing::info!("Examining file {}", entry.path().display());
-            let mut file = fs::File::open(entry.path())?;
-            let mut buf = [0u8; 256];
-            let read_amount = file.read(&mut buf)?;
+            let mut file = BufReader::new(fs::File::open(entry.path())?);
+            let mut buf = String::new();
+            let read_amount = file.read_line(&mut buf).unwrap_or(0);
             if read_amount > 0
-                && (buf.starts_with(b"-----BEGIN AGE ENCRYPTED FILE-----")
-                    || buf.starts_with(b"age-encryption.org/v1"))
+                && (buf.starts_with("-----BEGIN AGE ENCRYPTED FILE-----")
+                    || buf.starts_with("age-encryption.org/v1"))
             {
                 files.insert(entry.path().to_owned());
             }
@@ -262,19 +263,13 @@ fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
         fs::rename(item, &bak)?;
 
         ui_info(logger, format!("Decrypting {}", item.to_string_lossy()));
-        let armor = ArmoredReader::new(fs::File::open(&bak)?);
-        let decryptor = match Decryptor::new(armor)? {
-            Decryptor::Recipients(d) => d,
-            _ => {
+        match decrypt_single_file(item, &bak, &identity) {
+            Ok(()) => (),
+            Err(e) => {
+                ui_info(logger, format!("Error: {}", e.to_string()));
                 ui_info(logger, "Decrypting failed, file skipped".to_string());
-                continue;
             }
-        };
-        let identities = vec![Box::new(identity.clone()) as Box<dyn Identity>];
-        let mut reader = decryptor.decrypt(identities.into_iter())?;
-        let mut writer = fs::File::create(item)?;
-        copy(&mut reader, &mut writer)?;
-        writer.flush()?;
+        }
     }
 
     ui_info(
@@ -286,5 +281,21 @@ fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
     writer.flush()?;
 
     ui_info(logger, "Done!".to_string());
+    Ok(())
+}
+
+fn decrypt_single_file(target: &Path, backup: &Path, identity: &x25519::Identity) -> Result<()> {
+    let armor = ArmoredReader::new(fs::File::open(backup)?);
+    let decryptor = match Decryptor::new(armor)? {
+        Decryptor::Recipients(d) => d,
+        _ => {
+            bail!("File is not encrypted with key pairs. Was file not encrypted with logseq?");
+        }
+    };
+    let identities = vec![Box::new(identity.clone()) as Box<dyn Identity>];
+    let mut reader = decryptor.decrypt(identities.into_iter())?;
+    let mut writer = fs::File::create(target)?;
+    copy(&mut reader, &mut writer)?;
+    writer.flush()?;
     Ok(())
 }
