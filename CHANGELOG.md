@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.4.0 - 2021-03-27
+
+
+### Features
+
+222a61 - more detailed decryption report - [kanru](https://github.com/kanru)
+
+ef051f - skip files failing to decrypt for more robust experience - [kanru](https://github.com/kanru)
+
+
+- - -
 ## 0.3.3 - 2021-03-21
 
 
