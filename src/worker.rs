@@ -9,6 +9,7 @@ use edn_rs::Edn;
 use secrecy::{ExposeSecret, Secret};
 use std::{
     collections::HashSet,
+    fmt::Display,
     fs,
     io::{copy, BufRead, BufReader, Read, Write},
     path::Path,
@@ -183,8 +184,29 @@ fn encrypt(msg: Encrypt, logger: &ChildrenRef) -> Result<()> {
     Ok(())
 }
 
+#[derive(Debug, Default)]
+struct Stats {
+    files: usize,
+    encrypted: usize,
+    failed: usize,
+    skipped: usize,
+    decrypted: usize,
+}
+
+impl Display for Stats {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "\tFound files: {}", self.files)?;
+        writeln!(f, "\tNumber of encrypted files: {}", self.encrypted)?;
+        writeln!(f, "\tNumber of files failed to decrypt: {}", self.failed)?;
+        writeln!(f, "\tNumber of files skipped: {}", self.skipped)?;
+        write!(f, "\tNumber of files decrypted: {}", self.decrypted)?;
+        Ok(())
+    }
+}
+
 fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
     let metadata_path = msg.path;
+    let mut stats = Stats::default();
     let content = fs::read_to_string(&metadata_path).unwrap();
     let metadata_edn = Edn::from_str(&content).unwrap();
     let metadata = LogseqMetadata {
@@ -236,6 +258,8 @@ fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
 
     let mut files = HashSet::new();
     for entry in walkdir::WalkDir::new(graph_dir) {
+        stats.files += 1;
+
         let entry = entry?;
         if entry.file_type().is_file()
             && !entry.path().extension().map_or(false, |ext| ext.eq("bak"))
@@ -249,6 +273,7 @@ fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
                     || buf.starts_with("age-encryption.org/v1"))
             {
                 files.insert(entry.path().to_owned());
+                stats.encrypted += 1;
             }
         }
     }
@@ -264,10 +289,14 @@ fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
 
         ui_info(logger, format!("Decrypting {}", item.to_string_lossy()));
         match decrypt_single_file(item, &bak, &identity) {
-            Ok(()) => (),
+            Ok(()) => {
+                stats.decrypted += 1;
+            }
             Err(e) => {
                 ui_info(logger, format!("Error: {}", e.to_string()));
                 ui_info(logger, "Decrypting failed, file skipped".to_string());
+                stats.failed += 1;
+                stats.skipped += 1;
             }
         }
     }
@@ -281,6 +310,7 @@ fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
     writer.flush()?;
 
     ui_info(logger, "Done!".to_string());
+    ui_info(logger, format!("Statistics:\n{}", stats));
     Ok(())
 }
 
