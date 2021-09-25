@@ -12,6 +12,7 @@ use std::{
     fmt::Display,
     fs,
     io::{copy, BufRead, BufReader, Read, Write},
+    iter,
     path::Path,
     str::FromStr,
 };
@@ -240,11 +241,7 @@ fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
     reader.read_to_string(&mut decrypted)?;
     let key_pair = Edn::from_str(&decrypted)?;
     let secret = key_pair[0].to_string();
-    let secret = secret
-        .strip_prefix("\"")
-        .unwrap()
-        .strip_suffix("\"")
-        .unwrap();
+    let secret = secret.strip_prefix('"').unwrap().strip_suffix('"').unwrap();
     let identity: x25519::Identity = secret.parse().map_err(|_| anyhow!("parse secret error"))?;
     ui_info(logger, "Secret key recovered!".to_string());
     let graph_dir = metadata_path.parent().unwrap().parent().unwrap();
@@ -314,7 +311,7 @@ fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
     Ok(())
 }
 
-fn decrypt_single_file(target: &Path, backup: &Path, identity: &x25519::Identity) -> Result<()> {
+fn decrypt_single_file(target: &Path, backup: &Path, identity: &dyn Identity) -> Result<()> {
     let armor = ArmoredReader::new(fs::File::open(backup)?);
     let decryptor = match Decryptor::new(armor)? {
         Decryptor::Recipients(d) => d,
@@ -322,8 +319,7 @@ fn decrypt_single_file(target: &Path, backup: &Path, identity: &x25519::Identity
             bail!("File is not encrypted with key pairs. Was file not encrypted with logseq?");
         }
     };
-    let identities = vec![Box::new(identity.clone()) as Box<dyn Identity>];
-    let mut reader = decryptor.decrypt(identities.into_iter())?;
+    let mut reader = decryptor.decrypt(iter::once(identity))?;
     let mut writer = fs::File::create(target)?;
     copy(&mut reader, &mut writer)?;
     writer.flush()?;

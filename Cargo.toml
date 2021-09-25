@@ -12,7 +12,7 @@ repository = "https://github.com/kanru/logseq-encrypt-ui"
 [dependencies]
 iui = { git = "https://github.com/rust-native-ui/libui-rs.git", branch = "trunk" }
 edn-rs = "0.16.12"
-age = { version = "0.5.1", features = ["armor"] }
+age = { version = "0.6.0", features = ["armor"] }
 secrecy = "0.7.0"
 walkdir = "2"
 bastion = "0.4"
