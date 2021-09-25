@@ -2,6 +2,30 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 0.5.0 - 2021-09-25
+
+
+### Documentation
+
+fb8407 - add link to latest release to README.md - [kanru](https://github.com/kanru)
+
+
+### Features
+
+bce918 - skip hidden files (name starts with .) - [kanru](https://github.com/kanru)
+
+
+### Refactoring
+
+5c5014 - upgrade dependencies - [kanru](https://github.com/kanru)
+
+
+### Build system
+
+c302b7 - update cocogitto bump hook - [kanru](https://github.com/kanru)
+
+
+- - -
 ## 0.4.0 - 2021-03-27
 
 
