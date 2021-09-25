@@ -16,6 +16,7 @@ use std::{
     path::Path,
     str::FromStr,
 };
+use walkdir::{DirEntry, WalkDir};
 
 #[derive(Debug)]
 struct LogseqMetadata {
@@ -150,7 +151,10 @@ fn encrypt(msg: Encrypt, logger: &ChildrenRef) -> Result<()> {
     );
 
     let mut files = HashSet::new();
-    for entry in walkdir::WalkDir::new(graph_dir) {
+    for entry in WalkDir::new(graph_dir)
+        .into_iter()
+        .filter_entry(|e| !is_hidden(e))
+    {
         let entry = entry?;
         if entry.file_type().is_file()
             && (entry.path().extension().map_or(false, |ext| ext.eq("md"))
@@ -205,6 +209,14 @@ impl Display for Stats {
     }
 }
 
+fn is_hidden(entry: &DirEntry) -> bool {
+    entry
+        .file_name()
+        .to_str()
+        .map(|s| s.starts_with("."))
+        .unwrap_or(false)
+}
+
 fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
     let metadata_path = msg.path;
     let mut stats = Stats::default();
@@ -254,7 +266,10 @@ fn decrypt(msg: Decrypt, logger: &ChildrenRef) -> Result<()> {
     );
 
     let mut files = HashSet::new();
-    for entry in walkdir::WalkDir::new(graph_dir) {
+    for entry in WalkDir::new(graph_dir)
+        .into_iter()
+        .filter_entry(|e| !is_hidden(e))
+    {
         stats.files += 1;
 
         let entry = entry?;
